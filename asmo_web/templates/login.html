@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="form-page">
+  <div class="form-card">
+
+    <form method="post">
+      <div class="field">
+        <label>Логин</label>
+        <input name="username" required>
+      </div>
+
+      <div class="field">
+        <label>Пароль</label>
+        <input name="password" type="password" required>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn-big" type="submit">Войти</button>
+        <a class="btn-big" href="/register">Регистрация</a>
+        <a class="btn-big" href="/reset">Сбросить пароль</a>
+      </div>
+    </form>
+
+  </div>
+</div>
+
+{% endblock %}

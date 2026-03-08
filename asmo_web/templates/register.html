@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="form-page">
+  <div class="form-card">
+
+    <form method="post">
+      <div class="field">
+        <label>Логин*</label>
+        <input name="username" required>
+      </div>
+
+      <div class="field">
+        <label>Почта*</label>
+        <input name="email" type="email" required>
+      </div>
+
+      <div class="field">
+        <label>Пароль*</label>
+        <input name="password" type="password" required>
+      </div>
+
+      <button class="btn-big" type="submit">Зарегистрироваться</button>
+    </form>
+
+    <div class="hint">
+      Пароль должен содержать<br>
+      минимум 8 символов, включая<br>
+      цифры и спецсимвол
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}

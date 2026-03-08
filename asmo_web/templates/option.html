@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Расчёт опциона (Black–Scholes)</h2>
+
+<form method="post" action="/option">
+  <div>S (цена актива): <input name="S" value="{{ (form.S if form else '100') }}"></div>
+  <div>K (страйк): <input name="K" value="{{ (form.K if form else '100') }}"></div>
+  <div>T (лет до экспирации): <input name="T" value="{{ (form.T if form else '1') }}"></div>
+  <div>r (ставка, доля): <input name="r" value="{{ (form.r if form else '0.1') }}"></div>
+  <div>sigma (волат., доля): <input name="sigma" value="{{ (form.sigma if form else '0.3') }}"></div>
+  <br>
+  <button type="submit">Рассчитать</button>
+</form>
+
+{% if result %}
+  <hr>
+  <h3>Результаты</h3>
+  <ul>
+    <li><b>Call:</b> {{ "%.6f"|format(result.call) }}</li>
+    <li><b>Put:</b> {{ "%.6f"|format(result.put) }}</li>
+  </ul>
+
+  <h3>Греки</h3>
+  <ul>
+    <li>Delta (Call): {{ "%.6f"|format(result.delta_call) }}</li>
+    <li>Delta (Put): {{ "%.6f"|format(result.delta_put) }}</li>
+    <li>Gamma: {{ "%.6f"|format(result.gamma) }}</li>
+    <li>Vega: {{ "%.6f"|format(result.vega) }}</li>
+    <li>Theta (Call): {{ "%.6f"|format(result.theta_call) }}</li>
+    <li>Theta (Put): {{ "%.6f"|format(result.theta_put) }}</li>
+    <li>Rho (Call): {{ "%.6f"|format(result.rho_call) }}</li>
+    <li>Rho (Put): {{ "%.6f"|format(result.rho_put) }}</li>
+  </ul>
+{% endif %}
+
+{% endblock %}

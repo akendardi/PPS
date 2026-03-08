@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Панель пользователя</h2>
+
+Вы вошли как {{ session.get("username") }}
+
+{% endblock %}

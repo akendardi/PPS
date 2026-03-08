@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Архив расчётов</h2>
+
+{% if not rows %}
+  <p>Пока нет сохранённых расчётов. Сделай расчёт на странице “Опционы”.</p>
+{% else %}
+  <table border="1" cellpadding="6" cellspacing="0">
+    <tr>
+      <th>Дата</th>
+      <th>S</th><th>K</th><th>T</th><th>r</th><th>sigma</th>
+      <th>Call</th><th>Put</th>
+    </tr>
+    {% for r in rows %}
+      <tr>
+        <td>{{ r.created_at }}</td>
+        <td>{{ "%.2f"|format(r.s) }}</td>
+        <td>{{ "%.2f"|format(r.k) }}</td>
+        <td>{{ "%.4f"|format(r.t) }}</td>
+        <td>{{ "%.4f"|format(r.r) }}</td>
+        <td>{{ "%.4f"|format(r.sigma) }}</td>
+        <td>{{ "%.6f"|format(r.call_price) }}</td>
+        <td>{{ "%.6f"|format(r.put_price) }}</td>
+      </tr>
+    {% endfor %}
+  </table>
+{% endif %}
+
+{% endblock %}

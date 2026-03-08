@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>АСМО</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap">
+    <div class="topbar-row">
+      <div class="topbar-left">
+  {% if session.get("user_id") %}
+    <a class="btn-pill" href="/option">Произвести расчет</a>
+    <a class="btn-pill" href="/volatility">Предсказать волатильность</a>
+    <a class="btn-pill" href="/reports">Архив отчетов</a>
+  {% endif %}
+</div>
+
+      <div class="topbar-center">
+        {% if session.get("user_id") %}
+          <div>Здравствуйте, {{ session.get("username") }}!</div>
+          <div style="font-size:12px;color:#666;">{{ session.get("role", "Аналитик") }}</div>
+        {% else %}
+          <div>АСМО</div>
+          <div style="font-size:12px;color:#666;">Система моделирования опционов</div>
+        {% endif %}
+      </div>
+
+      <div class="topbar-right">
+        {% if session.get("user_id") %}
+          <a class="btn-pill red" href="/logout">Выйти</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  {% block content %}{% endblock %}
+</div>
+
+</body>
+</html>
