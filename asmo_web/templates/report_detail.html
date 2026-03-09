@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Расчет опциона</title>
+    <title>Отчёт по расчёту</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -19,11 +19,7 @@
             <div class="topbar-center">
                 <div>Здравствуйте, {{ session.get('login', 'Пользователь') }}!</div>
                 <div style="font-size:12px; color:#666; margin-top:4px;">
-                    {% if session.get('role') == 'admin' %}
-                    Администратор
-                    {% else %}
-                    Аналитик
-                    {% endif %}
+                    {% if session.get('role') == 'admin' %}Администратор{% else %}Аналитик{% endif %}
                 </div>
             </div>
 
@@ -35,93 +31,57 @@
 </div>
 
 <div class="wrap" style="padding-top: 28px;">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    <div class="flash-messages" style="max-width:1100px; margin:0 auto 20px;">
-        {% for category, message in messages %}
-        <div class="flash {{ category }}">{{ message }}</div>
-        {% endfor %}
-    </div>
-    {% endif %}
-    {% endwith %}
-
-    <form method="post" style="max-width:1100px; margin:0 auto 30px;">
-        <input type="hidden" name="ticker" value="{{ ticker }}">
+    <div style="max-width:1180px; margin:0 auto;">
 
         <div style="display:flex; gap:14px; align-items:center; justify-content:center; flex-wrap:wrap; margin-bottom:28px;">
             <div class="item" style="width:420px; margin:0;">
                 <div class="item-left">
                     <div class="badge">◉</div>
-                    <div class="item-name">{{ snapshot.instrument_name if snapshot else ticker }}</div>
+                    <div class="item-name">{{ snapshot.instrument_name }}</div>
                 </div>
             </div>
 
-            <select name="interval_code" class="select-pill" style="width:320px;">
-                {% for item in intervals %}
-                {% if item is string %}
-                {% set code = item %}
-                {% set label = get_interval_label(item) %}
-                {% elif item is mapping %}
-                {% set code = item.get('code', item.get('value', item.get('id', ''))) %}
-                {% set label = item.get('label', item.get('name', get_interval_label(code))) %}
-                {% else %}
-                {% set code = item[0] %}
-                {% if item|length > 1 %}
-                {% set label = item[1] %}
-                {% else %}
-                {% set label = get_interval_label(code) %}
-                {% endif %}
-                {% endif %}
-
-                <option value="{{ code }}" {% if interval_code== code %}selected{% endif %}>
-                    {{ label }}
-                </option>
-                {% endfor %}
-            </select>
+            <div class="select-pill" style="width:320px; display:flex; align-items:center;">
+                {{ snapshot.interval_label }}
+            </div>
         </div>
-
-        <div style="text-align:center; margin-bottom:20px;">
-            <button type="submit" class="btn-big" style="margin:0 auto;">Рассчитать</button>
-        </div>
-    </form>
-
-    {% if result and snapshot %}
-    <div style="max-width:1180px; margin:0 auto;">
 
         {% if charts %}
-        {% set chart_list = charts.values() | list %}
+            {% set chart_list = charts.values() | list %}
 
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:24px; margin-bottom:24px;">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:24px; margin-bottom:24px;">
 
-            <div style="border:1px solid #cfcfcf; border-radius:16px; padding:16px; background:#fff; min-height:220px; display:flex; align-items:center; justify-content:center;">
-                {% if chart_list|length > 0 and chart_list[0] %}
-                <img src="data:image/png;base64,{{ chart_list[0] }}" style="width:100%;">
-                {% else %}
-                <div style="color:#777;">График не найден</div>
-                {% endif %}
+                <div style="border:1px solid #cfcfcf; border-radius:16px; padding:16px; background:#fff; min-height:220px; display:flex; align-items:center; justify-content:center;">
+                    {% if chart_list|length > 0 and chart_list[0] %}
+                        <img src="data:image/png;base64,{{ chart_list[0] }}" style="width:100%;">
+                    {% else %}
+                        <div style="color:#777;">График не найден</div>
+                    {% endif %}
+                </div>
+
+                <div style="border:1px solid #cfcfcf; border-radius:16px; padding:16px; background:#fff; min-height:220px; display:flex; align-items:center; justify-content:center;">
+                    {% if chart_list|length > 1 and chart_list[1] %}
+                        <img src="data:image/png;base64,{{ chart_list[1] }}" style="width:100%;">
+                    {% else %}
+                        <div style="color:#777;">График не найден</div>
+                    {% endif %}
+                </div>
+
             </div>
-
-            <div style="border:1px solid #cfcfcf; border-radius:16px; padding:16px; background:#fff; min-height:220px; display:flex; align-items:center; justify-content:center;">
-                {% if chart_list|length > 1 and chart_list[1] %}
-                <img src="data:image/png;base64,{{ chart_list[1] }}" style="width:100%;">
-                {% else %}
-                <div style="color:#777;">График не найден</div>
-                {% endif %}
-            </div>
-
-        </div>
         {% endif %}
 
         <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:24px; margin-bottom:28px;">
             <div style="border:1px solid #cfcfcf; border-radius:16px; padding:18px; background:#fff;">
-                <div style="font-size:18px; margin-bottom:10px;"><strong>Данные инструмента</strong></div>
+                <div style="font-size:18px; margin-bottom:10px;"><strong>Данные отчёта</strong></div>
+                <div>ID: {{ report.id }}</div>
+                <div>Тикер: {{ report.ticker }}</div>
                 <div>Инструмент: {{ snapshot.instrument_name }}</div>
-                <div>Тикер: {{ snapshot.ticker }}</div>
                 <div>Интервал: {{ snapshot.interval_label }}</div>
+                <div>Дата: {{ format_dt(report.created_at) }}</div>
             </div>
 
             <div style="border:1px solid #cfcfcf; border-radius:16px; padding:18px; background:#fff;">
-                <div style="font-size:18px; margin-bottom:10px;"><strong>Автозагруженные параметры</strong></div>
+                <div style="font-size:18px; margin-bottom:10px;"><strong>Параметры модели</strong></div>
                 <div>S: {{ "%.2f"|format(snapshot.S) }}</div>
                 <div>K: {{ "%.2f"|format(snapshot.K) }}</div>
                 <div>T: {{ "%.6f"|format(snapshot.T) }}</div>
@@ -130,7 +90,7 @@
             </div>
 
             <div style="border:1px solid #cfcfcf; border-radius:16px; padding:18px; background:#fff;">
-                <div style="font-size:18px; margin-bottom:10px;"><strong>Результат расчета</strong></div>
+                <div style="font-size:18px; margin-bottom:10px;"><strong>Результат расчёта</strong></div>
                 <div>Call: {{ "%.6f"|format(result.call) }}</div>
                 <div>Put: {{ "%.6f"|format(result.put) }}</div>
                 <div>Gamma: {{ "%.6f"|format(result.gamma) }}</div>
@@ -174,17 +134,13 @@
             </table>
         </div>
 
-        {% if last_report_id %}
         <div style="text-align:center; margin-bottom:20px;">
-            <a href="{{ url_for('main.report_detail_unified', report_type='option', report_id=last_report_id) }}"
-               class="btn-big"
-               style="width:320px; margin:0 auto;">
-                Открыть отчет
+            <a href="{{ url_for('main.report_pdf', report_id=report.id) }}" class="btn-big" style="margin:0 auto;">
+                Скачать PDF
             </a>
         </div>
-        {% endif %}
+
     </div>
-    {% endif %}
 </div>
 
 </body>

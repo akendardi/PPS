@@ -1,4 +1,4 @@
-from . import create_app
+from asmo_web import create_app
 
 app = create_app()
 

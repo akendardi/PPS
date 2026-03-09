@@ -1,28 +1,55 @@
-{% extends "base.html" %}
-{% block content %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Вход</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
 
 <div class="form-page">
-  <div class="form-card">
+    <div class="form-card">
 
-    <form method="post">
-      <div class="field">
-        <label>Логин</label>
-        <input name="username" required>
-      </div>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
 
-      <div class="field">
-        <label>Пароль</label>
-        <input name="password" type="password" required>
-      </div>
+        <form method="post">
 
-      <div class="form-actions">
-        <button class="btn-big" type="submit">Войти</button>
-        <a class="btn-big" href="/register">Регистрация</a>
-        <a class="btn-big" href="/reset">Сбросить пароль</a>
-      </div>
-    </form>
+            <div class="field">
+                <label for="login">Логин</label>
+                <input
+                    id="login"
+                    type="text"
+                    name="login"
+                    value="{{ request.form.get('login', '') }}"
+                >
+            </div>
 
-  </div>
+            <div class="field">
+                <label for="password">Пароль</label>
+                <input
+                    id="password"
+                    type="password"
+                    name="password"
+                >
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-big">Войти</button>
+                <a href="{{ url_for('auth.register') }}" class="btn-big">Регистрация</a>
+                <a href="#" class="btn-big">Сбросить пароль</a>
+            </div>
+
+        </form>
+    </div>
 </div>
 
-{% endblock %}
+</body>
+</html>

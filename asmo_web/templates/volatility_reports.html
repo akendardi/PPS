@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Архив отчетов</title>
+    <title>Архив прогнозов волатильности</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -13,7 +13,7 @@
             <div class="topbar-left">
                 <a href="{{ url_for('main.option_menu') }}" class="btn-pill">Произвести расчет</a>
                 <a href="{{ url_for('main.volatility_menu') }}" class="btn-pill">Предсказать волатильность</a>
-                <a href="{{ url_for('main.reports') }}" class="btn-pill">Отчеты</a>
+                <a href="{{ url_for('main.reports') }}" class="btn-pill">Архив отчетов</a>
             </div>
 
             <div class="topbar-center">
@@ -41,35 +41,26 @@
         {% endif %}
     {% endwith %}
 
-    <div style="text-align:center; margin-bottom:22px;">
-        <span class="title-pill">Архив отчетов</span>
-    </div>
-
-    <div style="display:flex; justify-content:center; gap:18px; margin-bottom:24px;">
-        <div class="select-pill" style="width:360px; display:flex; align-items:center;">Выберите инструмент</div>
-        <div class="select-pill" style="width:360px; display:flex; align-items:center;">Выберите период отчетов</div>
+    <div style="text-align:center; margin-bottom:24px;">
+        <span class="title-pill">Архив прогнозов волатильности</span>
     </div>
 
     <div class="list" style="max-width:1100px; margin:0 auto;">
         {% for row in rows %}
-            <div class="report-row" style="margin-bottom:16px;">
-                <div style="display:flex; align-items:center; gap:26px;">
-                    <div style="min-width:110px; font-size:18px;">{{ row.title }}</div>
-
-                    <div style="font-size:18px; line-height:1.5;">
-                        <div>{{ row.subtitle }}</div>
-                        <div>Дата создания: {{ row.created_at }}</div>
-                    </div>
+            <div class="report-row" style="margin-bottom:14px;">
+                <div>
+                    <div style="font-size:20px; font-weight:600;">{{ row.instrument_name }} ({{ row.ticker }})</div>
+                    <div style="margin-top:8px;">Горизонт: {{ row.horizon_code }}</div>
+                    <div>Прогноз: {{ "%.6f"|format(row.predicted_iv) }}</div>
+                    <div>Дата: {{ row.created_at }}</div>
                 </div>
 
-                <a href="{{ url_for('main.report_detail_unified', report_type=row.type, report_id=row.id) }}"
-                   class="btn-big"
-                   style="width:220px; margin:0;">
+                <a href="{{ url_for('main.volatility_report_detail', report_id=row.id) }}" class="btn-big" style="width:220px; margin:0;">
                     Открыть
                 </a>
             </div>
         {% else %}
-            <div style="text-align:center; color:#666;">Пока нет сохранённых отчётов</div>
+            <div style="text-align:center; color:#666;">Пока нет сохранённых прогнозов</div>
         {% endfor %}
     </div>
 </div>

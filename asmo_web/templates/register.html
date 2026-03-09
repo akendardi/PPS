@@ -1,35 +1,76 @@
-{% extends "base.html" %}
-{% block content %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Регистрация</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
 
 <div class="form-page">
-  <div class="form-card">
+    <div class="form-card">
 
-    <form method="post">
-      <div class="field">
-        <label>Логин*</label>
-        <input name="username" required>
-      </div>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
 
-      <div class="field">
-        <label>Почта*</label>
-        <input name="email" type="email" required>
-      </div>
+        <form method="post">
 
-      <div class="field">
-        <label>Пароль*</label>
-        <input name="password" type="password" required>
-      </div>
+            <div class="field">
+                <label for="login">Логин*</label>
+                <input
+                    id="login"
+                    type="text"
+                    name="login"
+                    value="{{ request.form.get('login', '') }}"
+                >
+            </div>
 
-      <button class="btn-big" type="submit">Зарегистрироваться</button>
-    </form>
+            <div class="field">
+                <label for="email">Почта*</label>
+                <input
+                    id="email"
+                    type="email"
+                    name="email"
+                    value="{{ request.form.get('email', '') }}"
+                >
+            </div>
 
-    <div class="hint">
-      Пароль должен содержать<br>
-      минимум 8 символов, включая<br>
-      цифры и спецсимвол
+            <div class="field">
+                <label for="password">Пароль*</label>
+                <input
+                    id="password"
+                    type="password"
+                    name="password"
+                >
+            </div>
+
+            <div class="field">
+                <label for="confirm_password">Подтверждение пароля*</label>
+                <input
+                    id="confirm_password"
+                    type="password"
+                    name="confirm_password"
+                >
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-big">Зарегистрироваться</button>
+            </div>
+
+            <p style="text-align:center; font-size:18px; line-height:1.35; margin-top:18px;">
+                Пароль должен содержать минимум 8 символов, включая цифры и спецсимвол
+            </p>
+
+        </form>
     </div>
-
-  </div>
 </div>
 
-{% endblock %}
+</body>
+</html>

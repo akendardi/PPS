@@ -1,6 +1,151 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Прогноз волатильности</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
 
-{% block content %}
-<h2>Прогноз волатильности</h2>
-Пока заглушка
-{% endblock %}
+<div class="topbar">
+    <div class="wrap">
+        <div class="topbar-row">
+            <div class="topbar-left">
+                <a href="{{ url_for('main.option_menu') }}" class="btn-pill">Произвести расчет</a>
+                <a href="{{ url_for('main.volatility_menu') }}" class="btn-pill">Предсказать волатильность</a>
+                <a href="{{ url_for('main.reports') }}" class="btn-pill">Архив отчетов</a>
+            </div>
+
+            <div class="topbar-center">
+                <div>Здравствуйте, {{ session.get('login', 'Пользователь') }}!</div>
+                <div style="font-size:12px; color:#666; margin-top:4px;">
+                    {% if session.get('role') == 'admin' %}
+                        Администратор
+                    {% else %}
+                        Аналитик
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="topbar-right">
+                <a href="{{ url_for('auth.logout') }}" class="btn-pill red">Выйти</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="wrap" style="padding-top: 28px;">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages" style="max-width:1100px; margin:0 auto 20px;">
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <form method="post" style="max-width:1100px; margin:0 auto 30px;">
+        <input type="hidden" name="ticker" value="{{ ticker }}">
+
+        <div style="display:flex; gap:14px; align-items:center; justify-content:center; flex-wrap:wrap; margin-bottom:28px;">
+            <div class="item" style="width:420px; margin:0;">
+                <div class="item-left">
+                    <div class="badge">◉</div>
+                    <div class="item-name">{{ instrument_name if instrument_name else ticker }}</div>
+                </div>
+            </div>
+
+            <select name="horizon_code" class="select-pill" style="width:320px;">
+                <option value="1d" {% if horizon_code == '1d' %}selected{% endif %}>1 день</option>
+                <option value="7d" {% if horizon_code == '7d' %}selected{% endif %}>7 дней</option>
+                <option value="30d" {% if horizon_code == '30d' %}selected{% endif %}>30 дней</option>
+            </select>
+        </div>
+
+        <div style="text-align:center; margin-bottom:20px;">
+            <button type="submit" class="btn-big" style="margin:0 auto;">Прогнозировать</button>
+        </div>
+    </form>
+
+    {% if prediction is not none %}
+        <div style="max-width:1180px; margin:0 auto;">
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:24px; margin-bottom:24px; align-items:start;">
+                <div style="border:1px solid #cfcfcf; border-radius:16px; padding:16px; background:#fff; min-height:420px;">
+                    {% if chart %}
+                        <img
+                            src="data:image/png;base64,{{ chart }}"
+                            alt="Volatility forecast chart"
+                            style="width:100%; max-width:100%;"
+                        >
+                    {% endif %}
+                </div>
+
+                <div style="border:1px solid #cfcfcf; border-radius:16px; padding:12px; background:#fff; height:420px; overflow:auto;">
+                    <table style="width:100%; border-collapse:collapse; font-size:14px;">
+                        <thead style="position:sticky; top:0; background:#fff; z-index:1;">
+                            <tr>
+                                <th style="border:1px solid #d0d0d0; padding:6px; text-align:left;">Дата</th>
+                                <th style="border:1px solid #d0d0d0; padding:6px; text-align:left;">IV_факт</th>
+                                <th style="border:1px solid #d0d0d0; padding:6px; text-align:left;">IV_прогноз</th>
+                                <th style="border:1px solid #d0d0d0; padding:6px; text-align:left;">Нижняя граница</th>
+                                <th style="border:1px solid #d0d0d0; padding:6px; text-align:left;">Верхняя граница</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in forecast_rows %}
+                                <tr>
+                                    <td style="border:1px solid #d0d0d0; padding:6px;">{{ row.date }}</td>
+                                    <td style="border:1px solid #d0d0d0; padding:6px;">
+                                        {% if row.iv_fact is not none %}{{ "%.4f"|format(row.iv_fact) }}{% else %}NaN{% endif %}
+                                    </td>
+                                    <td style="border:1px solid #d0d0d0; padding:6px;">
+                                        {% if row.iv_forecast is not none %}{{ "%.4f"|format(row.iv_forecast) }}{% else %}NaN{% endif %}
+                                    </td>
+                                    <td style="border:1px solid #d0d0d0; padding:6px;">
+                                        {% if row.lower is not none %}{{ "%.4f"|format(row.lower) }}{% else %}NaN{% endif %}
+                                    </td>
+                                    <td style="border:1px solid #d0d0d0; padding:6px;">
+                                        {% if row.upper is not none %}{{ "%.4f"|format(row.upper) }}{% else %}NaN{% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr; gap:24px; margin-bottom:28px;">
+                <div style="border:1px solid #cfcfcf; border-radius:16px; padding:18px; background:#fff;">
+                    <div style="font-size:18px; margin-bottom:10px;"><strong>Прогноз волатильности</strong></div>
+                    <div>Инструмент: {{ instrument_name }}</div>
+                    <div>Тикер: {{ ticker }}</div>
+                    <div>Горизонт: {{ horizon_label }}</div>
+                    <div style="margin-top:10px;">Текущая IV/HV: <strong>{{ "%.6f"|format(current_hv20) }}</strong></div>
+                    <div style="margin-top:8px;">Прогноз: <strong>{{ "%.6f"|format(prediction) }}</strong></div>
+                    <div style="margin-top:8px;">Нижняя граница: <strong>{{ "%.6f"|format(lower) }}</strong></div>
+                    <div style="margin-top:8px;">Верхняя граница: <strong>{{ "%.6f"|format(upper) }}</strong></div>
+                </div>
+            </div>
+
+            <form method="post" action="{{ url_for('main.save_volatility_report') }}" style="text-align:center; margin-bottom:20px;">
+                <input type="hidden" name="ticker" value="{{ ticker }}">
+                <input type="hidden" name="instrument_name" value="{{ instrument_name }}">
+                <input type="hidden" name="horizon_code" value="{{ horizon_code }}">
+                <input type="hidden" name="current_iv" value="{{ current_hv20 }}">
+                <input type="hidden" name="predicted_iv" value="{{ prediction }}">
+                <input type="hidden" name="lower_bound" value="{{ lower }}">
+                <input type="hidden" name="upper_bound" value="{{ upper }}">
+                <input type="hidden" name="forecast_rows_json" value='{{ forecast_rows|tojson|safe }}'>
+                <input type="hidden" name="chart_base64" value="{{ chart }}">
+
+                <button type="submit" class="btn-big" style="margin:0 auto;">Сохранить отчет</button>
+            </form>
+        </div>
+    {% endif %}
+</div>
+
+</body>
+</html>
